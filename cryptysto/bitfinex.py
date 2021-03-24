@@ -34,7 +34,7 @@ def transform_bifinex_le_to_generic(le: BitfinexLedgerEntry) -> GenericOpTypes:
                 exchange="Bitfinex",
                 date=le.date,
                 asset=asset(le.currency),
-                amount=le.amount,
+                amount=abs(le.amount),
             )
         )
     if re.match("^Deposit Fee \(.*", le.desc):
@@ -43,7 +43,7 @@ def transform_bifinex_le_to_generic(le: BitfinexLedgerEntry) -> GenericOpTypes:
                 exchange="Bitfinex",
                 date=le.date,
                 asset=asset(le.currency),
-                amount=le.amount,
+                amount=abs(le.amount),
             )
         )
     if re.match("^.+ Withdrawal #\d+", le.desc):
@@ -52,7 +52,7 @@ def transform_bifinex_le_to_generic(le: BitfinexLedgerEntry) -> GenericOpTypes:
                 exchange="Bitfinex",
                 date=le.date,
                 asset=asset(le.currency),
-                amount=le.amount,
+                amount=abs(le.amount),
             )
         )
     if re.match("^.+ Withdrawal fee", le.desc):
@@ -61,7 +61,25 @@ def transform_bifinex_le_to_generic(le: BitfinexLedgerEntry) -> GenericOpTypes:
                 exchange="Bitfinex",
                 date=le.date,
                 asset=asset(le.currency),
+                amount=abs(le.amount),
+            )
+        )
+    if re.match("^Exchange .+", le.desc):
+        entry.append(
+            Trade(
+                exchange="Bitfinex",
+                date=le.date,
+                asset=asset(le.currency),
                 amount=le.amount,
+            )
+        )
+    if re.match("^Trading fees for .+", le.desc):
+        entry.append(
+            TradeFee(
+                exchange="Bitfinex",
+                date=le.date,
+                asset=asset(le.currency),
+                amount=abs(le.amount),
             )
         )
     return entry

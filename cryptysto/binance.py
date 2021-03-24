@@ -32,4 +32,10 @@ def transform_binance_le_to_generic(le: BinanceLedgerEntry) -> GenericOpTypes:
                 exchange="Binance", date=le.time, asset=asset(le.coin), amount=le.change
             )
         )
+    if le.operation in ("Transaction Related", "Sell", "Buy"):
+        entry.append(
+            Trade(
+                exchange="Binance", date=le.time, asset=asset(le.coin), amount=le.change
+            )
+        )
     return entry

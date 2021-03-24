@@ -110,7 +110,21 @@ class WithdrawalFee(DWBase):
         return "%s: [%s] Withdrawal Fee [%s] amount: %s"
 
 
-GenericOpTypes = List[Union[Deposit, DepositFee, Withdrawal, WithdrawalFee]]
+@dataclass(frozen=True)
+class Trade(DWBase):
+    def get_str(self):
+        return "%s: [%s] Trade [%s] amount: %s"
+
+
+@dataclass(frozen=True)
+class TradeFee(DWBase):
+    def get_str(self):
+        return "%s: [%s] Trade Fee [%s] amount: %s"
+
+
+GenericOpTypes = List[
+    Union[Deposit, DepositFee, Withdrawal, WithdrawalFee, Trade, TradeFee]
+]
 
 
 @dataclass

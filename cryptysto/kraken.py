@@ -32,23 +32,52 @@ def transform_kraken_le_to_generic(le: KrakenLedgerEntry) -> GenericOpTypes:
     if le._type == "deposit" and le.txid and le.refid:
         entry.append(
             Deposit(
-                exchange="Kraken", date=le.time, asset=asset(le.asset), amount=le.amount
+                exchange="Kraken",
+                date=le.time,
+                asset=asset(le.asset),
+                amount=abs(le.amount),
             )
         )
         entry.append(
             DepositFee(
-                exchange="Kraken", date=le.time, asset=asset(le.asset), amount=le.fee
+                exchange="Kraken",
+                date=le.time,
+                asset=asset(le.asset),
+                amount=abs(le.fee),
             )
         )
     if le._type == "withdrawal" and le.txid and le.refid:
         entry.append(
             Withdrawal(
-                exchange="Kraken", date=le.time, asset=asset(le.asset), amount=le.amount
+                exchange="Kraken",
+                date=le.time,
+                asset=asset(le.asset),
+                amount=abs(le.amount),
             )
         )
         entry.append(
             WithdrawalFee(
-                exchange="Kraken", date=le.time, asset=asset(le.asset), amount=le.fee
+                exchange="Kraken",
+                date=le.time,
+                asset=asset(le.asset),
+                amount=abs(le.fee),
+            )
+        )
+    if le._type == "trade":
+        entry.append(
+            Trade(
+                exchange="Kraken",
+                date=le.time,
+                asset=asset(le.asset),
+                amount=le.amount,
+            )
+        )
+        entry.append(
+            TradeFee(
+                exchange="Kraken",
+                date=le.time,
+                asset=asset(le.asset),
+                amount=abs(le.fee),
             )
         )
     return entry

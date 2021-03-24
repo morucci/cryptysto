@@ -53,20 +53,50 @@ def display_summary(ledger: GenericLedger) -> None:
         "Deposit Fee": DepositFee,
         "Withdrawal": Withdrawal,
         "Withdrawal Fee": WithdrawalFee,
+        "Trade": Trade,
+        "Trade Fee": TradeFee,
     }
     for op_type in m.keys():
         for exchange in exhanges:
             for asset in assets:
-                total = sum(
-                    [
-                        op.amount
-                        for op in ledger.ops
-                        if isinstance(op, m[op_type])
-                        and op.asset.name == asset
-                        and op.exchange == exchange
-                    ]
-                )
-                if total != 0:
-                    print(
-                        "Total %s on %s of %s: %s" % (op_type, exchange, asset, total)
+                if op_type == "Trade":
+                    total_sell = sum(
+                        [
+                            abs(op.amount)
+                            for op in ledger.ops
+                            if isinstance(op, m[op_type])
+                            and op.amount < 0
+                            and op.asset.name == asset
+                            and op.exchange == exchange
+                        ]
                     )
+                    total_buy = sum(
+                        [
+                            abs(op.amount)
+                            for op in ledger.ops
+                            if isinstance(op, m[op_type])
+                            and op.amount > 0
+                            and op.asset.name == asset
+                            and op.exchange == exchange
+                        ]
+                    )
+                    if total_buy or total_sell:
+                        print(
+                            "Total %s on %s of %s: BUY: %s, SELL: %s"
+                            % (op_type, exchange, asset, total_buy, total_sell)
+                        )
+                else:
+                    total = sum(
+                        [
+                            op.amount
+                            for op in ledger.ops
+                            if isinstance(op, m[op_type])
+                            and op.asset.name == asset
+                            and op.exchange == exchange
+                        ]
+                    )
+                    if total != 0:
+                        print(
+                            "Total %s on %s of %s: %s"
+                            % (op_type, exchange, asset, total)
+                        )
