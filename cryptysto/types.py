@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Literal, Union
+from typing import List, Literal, Union, Dict
 
 
 @dataclass(frozen=True)
@@ -133,3 +133,24 @@ class GenericLedger:
 
 
 InputLedgers = List[Union[BitfinexLedger, KrakenLedger, BinanceLedger]]
+
+
+@dataclass
+class AssetBalance:
+    amount: float
+    asset: Asset
+
+    def show(self):
+        return "Balance %s: %s" % (self.asset.name, self.amount)
+
+
+@dataclass
+class Balance:
+    exchange: str
+    assets: List[AssetBalance]
+
+    def show(self):
+        return "\n".join(map(lambda ab: self.exchange + ": " + ab.show(), self.assets))
+
+
+Balances = Dict[str, Balance]

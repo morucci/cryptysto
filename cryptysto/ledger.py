@@ -11,6 +11,7 @@ from cryptysto.bitfinex import (
     load_bitfinex_ledger_file,
 )
 from cryptysto.kraken import transform_kraken_le_to_generic, load_kraken_ledger_file
+from cryptysto import utils
 
 
 def load_ledger_file(
@@ -47,6 +48,7 @@ def display_ledger(ledger: GenericLedger) -> None:
 def display_summary(ledger: GenericLedger) -> None:
     exhanges = set([op.exchange for op in ledger.ops])
     assets = set([op.asset.name for op in ledger.ops])
+    balances: Balances = dict()
 
     m = {
         "Deposit": Deposit,
@@ -56,34 +58,57 @@ def display_summary(ledger: GenericLedger) -> None:
         "Trade": Trade,
         "Trade Fee": TradeFee,
     }
+
+    def get_exchange_balance(exchange: str) -> Balance:
+        return balances.get(exchange, Balance(exchange=exchange, assets=[]))
+
+    def set_exchange_balance(exchange: str, balance: Balance) -> None:
+        balances[exchange] = balance
+
+    def get_total_buy(
+        ledger: GenericLedger, op_type: str, exchange: str, asset: str
+    ) -> float:
+        return sum(
+            [
+                abs(op.amount)
+                for op in ledger.ops
+                if isinstance(op, m[op_type])
+                and op.amount > 0
+                and op.asset.name == asset
+                and op.exchange == exchange
+            ]
+        )
+
+    def get_total_sell(
+        ledger: GenericLedger, op_type: str, exchange: str, asset: str
+    ) -> float:
+        return sum(
+            [
+                abs(op.amount)
+                for op in ledger.ops
+                if isinstance(op, m[op_type])
+                and op.amount < 0
+                and op.asset.name == asset
+                and op.exchange == exchange
+            ]
+        )
+
     for op_type in m.keys():
         for exchange in exhanges:
+            eb = get_exchange_balance(exchange=exchange)
             for asset in assets:
                 if op_type == "Trade":
-                    total_sell = sum(
-                        [
-                            abs(op.amount)
-                            for op in ledger.ops
-                            if isinstance(op, m[op_type])
-                            and op.amount < 0
-                            and op.asset.name == asset
-                            and op.exchange == exchange
-                        ]
-                    )
-                    total_buy = sum(
-                        [
-                            abs(op.amount)
-                            for op in ledger.ops
-                            if isinstance(op, m[op_type])
-                            and op.amount > 0
-                            and op.asset.name == asset
-                            and op.exchange == exchange
-                        ]
-                    )
+                    total_sell = get_total_sell(ledger, op_type, exchange, asset)
+                    total_buy = get_total_buy(ledger, op_type, exchange, asset)
                     if total_buy or total_sell:
                         print(
                             "Total %s on %s of %s: BUY: %s, SELL: %s"
                             % (op_type, exchange, asset, total_buy, total_sell)
+                        )
+                        eb.assets.append(
+                            AssetBalance(
+                                amount=total_buy - total_sell, asset=utils.asset(asset)
+                            )
                         )
                 else:
                     total = sum(
@@ -100,3 +125,7 @@ def display_summary(ledger: GenericLedger) -> None:
                             "Total %s on %s of %s: %s"
                             % (op_type, exchange, asset, total)
                         )
+            set_exchange_balance(exchange=exchange, balance=eb)
+
+    for balance in balances.values():
+        print(balance.show())
