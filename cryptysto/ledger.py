@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, List, Union
+from typing import Literal, List, Union, Callable
 from datetime import datetime
 from pathlib import Path
 
@@ -45,10 +45,9 @@ def display_ledger(ledger: GenericLedger) -> None:
         print(op.show())
 
 
-def display_summary(ledger: GenericLedger) -> None:
+def display_ledger_summary(ledger: GenericLedger) -> None:
     exhanges = set([op.exchange for op in ledger.ops])
     assets = set([op.asset.name for op in ledger.ops])
-    balances: Balances = dict()
 
     m = {
         "Deposit": Deposit,
@@ -59,21 +58,15 @@ def display_summary(ledger: GenericLedger) -> None:
         "Trade Fee": TradeFee,
     }
 
-    def get_exchange_balance(exchange: str) -> Balance:
-        return balances.get(exchange, Balance(exchange=exchange, assets=[]))
-
-    def set_exchange_balance(exchange: str, balance: Balance) -> None:
-        balances[exchange] = balance
-
-    def get_total_buy(
-        ledger: GenericLedger, op_type: str, exchange: str, asset: str
+    def get_total(
+        ledger: GenericLedger, op_type: str, exchange: str, asset: str, comp: Callable
     ) -> float:
         return sum(
             [
                 abs(op.amount)
                 for op in ledger.ops
                 if isinstance(op, m[op_type])
-                and op.amount > 0
+                and comp(op.amount)
                 and op.asset.name == asset
                 and op.exchange == exchange
             ]
@@ -82,20 +75,15 @@ def display_summary(ledger: GenericLedger) -> None:
     def get_total_sell(
         ledger: GenericLedger, op_type: str, exchange: str, asset: str
     ) -> float:
-        return sum(
-            [
-                abs(op.amount)
-                for op in ledger.ops
-                if isinstance(op, m[op_type])
-                and op.amount < 0
-                and op.asset.name == asset
-                and op.exchange == exchange
-            ]
-        )
+        return get_total(ledger, op_type, exchange, asset, lambda x: x < 0)
+
+    def get_total_buy(
+        ledger: GenericLedger, op_type: str, exchange: str, asset: str
+    ) -> float:
+        return get_total(ledger, op_type, exchange, asset, lambda x: x > 0)
 
     for op_type in m.keys():
         for exchange in exhanges:
-            eb = get_exchange_balance(exchange=exchange)
             for asset in assets:
                 if op_type == "Trade":
                     total_sell = get_total_sell(ledger, op_type, exchange, asset)
@@ -104,11 +92,6 @@ def display_summary(ledger: GenericLedger) -> None:
                         print(
                             "Total %s on %s of %s: BUY: %s, SELL: %s"
                             % (op_type, exchange, asset, total_buy, total_sell)
-                        )
-                        eb.assets.append(
-                            AssetBalance(
-                                amount=total_buy - total_sell, asset=utils.asset(asset)
-                            )
                         )
                 else:
                     total = sum(
@@ -125,7 +108,3 @@ def display_summary(ledger: GenericLedger) -> None:
                             "Total %s on %s of %s: %s"
                             % (op_type, exchange, asset, total)
                         )
-            set_exchange_balance(exchange=exchange, balance=eb)
-
-    for balance in balances.values():
-        print(balance.show())

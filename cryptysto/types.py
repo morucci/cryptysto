@@ -137,20 +137,50 @@ InputLedgers = List[Union[BitfinexLedger, KrakenLedger, BinanceLedger]]
 
 @dataclass
 class AssetBalance:
-    amount: float
     asset: Asset
+    amount: float
 
     def show(self):
         return "Balance %s: %s" % (self.asset.name, self.amount)
 
+    def add(self, amount: float):
+        self.amount += abs(amount)
+
+    def remove(self, amount: float):
+        self.amount -= abs(amount)
+
 
 @dataclass
-class Balance:
+class ExchangeBalance:
     exchange: str
-    assets: List[AssetBalance]
+    assets: Dict[str, AssetBalance]
 
     def show(self):
-        return "\n".join(map(lambda ab: self.exchange + ": " + ab.show(), self.assets))
+        return "\n".join(
+            map(lambda ab: self.exchange + ": " + ab.show(), self.assets.values())
+        )
+
+    def add_to_asset(self, asset: Asset, amount: float):
+        if asset.name not in self.assets:
+            self.assets[asset.name] = AssetBalance(asset=asset, amount=0)
+        ab = self.assets[asset.name]
+        ab.add(amount)
+
+    def remove_from_asset(self, asset: Asset, amount: float):
+        if asset.name not in self.assets:
+            self.assets[asset.name] = AssetBalance(asset=asset, amount=0)
+        ab = self.assets[asset.name]
+        ab.remove(amount)
 
 
-Balances = Dict[str, Balance]
+@dataclass
+class Balances:
+    balances: Dict[str, ExchangeBalance]
+
+    def get_exchange_balance(self, exchange: str) -> ExchangeBalance:
+        if exchange not in self.balances:
+            self.balances[exchange] = ExchangeBalance(exchange=exchange, assets=dict())
+        return self.balances[exchange]
+
+    def show(self):
+        return "\n".join([eb.show() for eb in self.balances.values()])

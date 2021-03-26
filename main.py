@@ -12,8 +12,9 @@ from cryptysto.ledger import (
     load_ledger_file,
     transform_to_generic,
     display_ledger,
-    display_summary,
+    display_ledger_summary,
 )
+from cryptysto.balance import display_balance
 
 from cryptysto.types import *
 
@@ -37,7 +38,8 @@ def main() -> None:
     generic_ledger = transform_to_generic(input_ledgers)
 
     display_ledger(generic_ledger)
-    display_summary(generic_ledger)
+    display_ledger_summary(generic_ledger)
+    display_balance(generic_ledger)
 
 
 main()
