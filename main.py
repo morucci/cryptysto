@@ -27,6 +27,13 @@ from cryptysto.types import *
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", help="Path to the configuration file")
+    parser.add_argument(
+        "--show-ledger-ops", help="Show all ledger operations", action="store_true"
+    )
+    parser.add_argument(
+        "--show-ledger-summary", help="Show ledger summary", action="store_true"
+    )
+    parser.add_argument("--show-balances", help="Show balances", action="store_true")
     args = parser.parse_args()
 
     input_ledgers: InputLedgers = []
@@ -37,9 +44,20 @@ def main() -> None:
 
     generic_ledger = transform_to_generic(input_ledgers)
 
-    display_ledger(generic_ledger)
-    display_ledger_summary(generic_ledger)
-    display_balance(generic_ledger)
+    if args.show_ledger_ops:
+        print("LEDGER operations")
+        print("=================")
+        display_ledger(generic_ledger)
+
+    if args.show_ledger_summary:
+        print("LEDGER Summary")
+        print("==============")
+        display_ledger_summary(generic_ledger)
+
+    if args.show_balances:
+        print("BALANCE Summary")
+        print("==============")
+        display_balance(generic_ledger)
 
 
 main()
