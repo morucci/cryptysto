@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -7,6 +9,7 @@ import argparse
 import yaml
 from dacite import from_dict
 import re
+from datetime import datetime
 
 from cryptysto.ledger import (
     load_ledger_file,
@@ -38,6 +41,10 @@ def main() -> None:
     parser.add_argument(
         "--show-last-op", help="Show last known operation", action="store_true"
     )
+    parser.add_argument(
+        "--compute-usdt-value", help="Add usdt value to balance", action="store_true"
+    )
+    parser.add_argument("--compute-until", help="Compute until date")
     args = parser.parse_args()
 
     input_ledgers: InputLedgers = []
@@ -47,6 +54,14 @@ def main() -> None:
         input_ledgers.append(load_ledger_file(ledger_c._type, Path(ledger_c.path)))
 
     generic_ledger = transform_to_generic(input_ledgers)
+
+    until_dt = datetime.now()
+
+    if args.compute_until:
+        until_dt = datetime.strptime(args.compute_until, "%Y-%m-%d")
+        generic_ledger.ops = list(
+            filter(lambda op: op.date <= until_dt, generic_ledger.ops)
+        )
 
     if args.show_ledger_ops:
         print("LEDGER operations")
@@ -59,9 +74,9 @@ def main() -> None:
         display_ledger_summary(generic_ledger)
 
     if args.show_balances:
-        print("BALANCE Summary")
+        print("BALANCE Summary at %s" % until_dt)
         print("==============")
-        display_balance(generic_ledger)
+        display_balance(generic_ledger, until_dt, args.compute_usdt_value)
 
     if args.show_last_op:
         print("Last operation")

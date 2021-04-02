@@ -27,6 +27,8 @@ def compute_balance(ledger: GenericLedger) -> Balances:
     return balances
 
 
-def display_balance(ledger: GenericLedger) -> None:
+def display_balance(
+    ledger: GenericLedger, until_date: datetime, compute_usdt_value: bool
+) -> None:
     b = compute_balance(ledger)
-    print(b.show())
+    print(b.show(until_date, compute_usdt_value))

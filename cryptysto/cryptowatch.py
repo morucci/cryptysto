@@ -17,10 +17,14 @@ def get_price(exchange: str, pair: str, date: datetime) -> float:
     try:
         resp.raise_for_status()
     except Exception as exc:
-        print("Warn - Unable to get ticket price due to %s" % exc)
+        print(
+            "Warn - [%s/%s] Unable to get ticket price due to %s"
+            % (exchange, pair, exc)
+        )
         return 0
     data = resp.json()
-    if "result" in data:
+    if "result" in data and data["result"]["7200"]:
         return data["result"]["7200"][0][4]
     else:
-        raise RuntimeError("Unable to decode exchange response")
+        print("Warn - [%s/%s] No ticker price for that date" % (exchange, pair))
+        return 0

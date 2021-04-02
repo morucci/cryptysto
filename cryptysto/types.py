@@ -146,7 +146,7 @@ class AssetBalance:
         return "[%s]: %s" % (self.asset.name, self.amount)
 
     def is_low(self):
-        if self.amount > 0.00001:
+        if self.amount > 0.0001:
             return False
         else:
             return True
@@ -157,14 +157,14 @@ class AssetBalance:
     def remove(self, amount: float):
         self.amount -= abs(amount)
 
-    def compute_usdt_value(self):
+    def compute_usdt_value(self, until_date: datetime):
         # Only use binance exchange to get ticker price
         self.usdt_value = (
             (
                 cryptowatch.get_price(
                     exchange="binance",
                     pair=self.asset.name + "USDT",
-                    date=datetime.now(),
+                    date=until_date,
                 )
                 * self.amount
             )
@@ -206,9 +206,9 @@ class ExchangeBalance:
         ab = self.assets[asset.name]
         ab.remove(amount)
 
-    def compute_usdt_value(self) -> None:
+    def compute_usdt_value(self, until_date: datetime) -> None:
         for asset in self.assets.values():
-            asset.compute_usdt_value()
+            asset.compute_usdt_value(until_date)
             self.usdt_value += asset.usdt_value
 
 
@@ -222,10 +222,11 @@ class Balances:
             self.balances[exchange] = ExchangeBalance(exchange=exchange, assets=dict())
         return self.balances[exchange]
 
-    def show(self):
-        for eb in self.balances.values():
-            eb.compute_usdt_value()
-            self.usdt_value += eb.usdt_value
+    def show(self, until_date: datetime, compute_usdt_value: bool):
+        if compute_usdt_value:
+            for eb in self.balances.values():
+                eb.compute_usdt_value(until_date)
+                self.usdt_value += eb.usdt_value
         return (
             "\n".join([eb.show() for eb in self.balances.values()])
             + "\n"
