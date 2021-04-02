@@ -53,6 +53,16 @@ def display_ledger(ledger: GenericLedger) -> None:
         print(op.show())
 
 
+def display_last_op(ledger: GenericLedger) -> None:
+    exhanges = set([op.exchange for op in ledger.ops])
+    for exchange in exhanges:
+        last_op = sorted(
+            filter(lambda op: op.exchange == exchange, ledger.ops), key=lambda e: e.date
+        )
+        if last_op:
+            print(last_op[-1].show())
+
+
 def display_ledger_summary(ledger: GenericLedger) -> None:
     exhanges = set([op.exchange for op in ledger.ops])
     assets = set([op.asset.name for op in ledger.ops])

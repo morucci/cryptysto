@@ -13,6 +13,7 @@ from cryptysto.ledger import (
     transform_to_generic,
     display_ledger,
     display_ledger_summary,
+    display_last_op,
 )
 from cryptysto.balance import display_balance
 
@@ -34,6 +35,9 @@ def main() -> None:
         "--show-ledger-summary", help="Show ledger summary", action="store_true"
     )
     parser.add_argument("--show-balances", help="Show balances", action="store_true")
+    parser.add_argument(
+        "--show-last-op", help="Show last known operation", action="store_true"
+    )
     args = parser.parse_args()
 
     input_ledgers: InputLedgers = []
@@ -58,6 +62,11 @@ def main() -> None:
         print("BALANCE Summary")
         print("==============")
         display_balance(generic_ledger)
+
+    if args.show_last_op:
+        print("Last operation")
+        print("==============")
+        display_last_op(generic_ledger)
 
 
 main()
