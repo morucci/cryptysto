@@ -15,6 +15,8 @@ def compute_balance(ledger: GenericLedger) -> Balances:
                 eb.add_to_asset(op.asset, op.amount)
         if isinstance(op, Withdrawal):
             eb.remove_from_asset(op.asset, op.amount)
+        if isinstance(op, WithdrawalFee):
+            eb.remove_from_asset(op.asset, op.amount)
         if isinstance(op, Deposit):
             eb.add_to_asset(op.asset, op.amount)
         if isinstance(op, TradeFee):

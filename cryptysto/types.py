@@ -141,7 +141,7 @@ class AssetBalance:
     amount: float
 
     def show(self):
-        return "Balance %s: %s" % (self.asset.name, self.amount)
+        return "[%s]: %s" % (self.asset.name, self.amount)
 
     def is_low(self):
         if self.amount > 0.00001:
@@ -164,7 +164,7 @@ class ExchangeBalance:
     def show(self):
         return "\n".join(
             map(
-                lambda ab: self.exchange + ": " + ab.show(),
+                lambda ab: self.exchange + ab.show(),
                 [a for a in self.assets.values() if not a.is_low()],
             )
         )
