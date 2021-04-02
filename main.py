@@ -24,7 +24,6 @@ from cryptysto.types import *
 
 
 # Todo (because it does not appear in my samples)
-# - Binance deposit fee
 # - Binance withwdrawal
 
 

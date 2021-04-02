@@ -32,9 +32,21 @@ def transform_binance_le_to_generic(le: BinanceLedgerEntry) -> GenericOpTypes:
                 exchange="Binance", date=le.time, asset=asset(le.coin), amount=le.change
             )
         )
-    if le.operation in ("Transaction Related", "Sell", "Buy"):
+    if le.operation in (
+        "Transaction Related",
+        "Small assets exchange BNB",
+        "Sell",
+        "Buy",
+    ):
         entry.append(
             Trade(
+                exchange="Binance", date=le.time, asset=asset(le.coin), amount=le.change
+            )
+        )
+    # Unable to distinguish between Fee type.
+    if le.operation == "Fee":
+        entry.append(
+            TradeFee(
                 exchange="Binance", date=le.time, asset=asset(le.coin), amount=le.change
             )
         )
