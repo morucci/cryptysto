@@ -29,14 +29,22 @@ def load_ledger_file(
 
 def transform_to_generic(ledgers: InputLedgers) -> GenericLedger:
     generic = GenericLedger(ops=[])
+
+    def add_in_generic_ops(gens: List) -> None:
+        for gen in gens:
+            if gen not in generic.ops:
+                generic.ops.append(gen)
+            else:
+                print("Dedup Warn: %s" % gen.show())
+
     for ledger in ledgers:
         for le in ledger:
             if isinstance(le, KrakenLedgerEntry):
-                generic.ops.extend(transform_kraken_le_to_generic(le))
+                add_in_generic_ops(transform_kraken_le_to_generic(le))
             if isinstance(le, BinanceLedgerEntry):
-                generic.ops.extend(transform_binance_le_to_generic(le))
+                add_in_generic_ops(transform_binance_le_to_generic(le))
             if isinstance(le, BitfinexLedgerEntry):
-                generic.ops.extend(transform_bifinex_le_to_generic(le))
+                add_in_generic_ops(transform_bifinex_le_to_generic(le))
     return generic
 
 
