@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Literal, Union, Dict
+from cryptysto import cryptowatch
 
 
 @dataclass(frozen=True)
@@ -139,6 +140,7 @@ InputLedgers = List[Union[BitfinexLedger, KrakenLedger, BinanceLedger]]
 class AssetBalance:
     asset: Asset
     amount: float
+    usdt_value: float = 0
 
     def show(self):
         return "[%s]: %s" % (self.asset.name, self.amount)
@@ -155,18 +157,41 @@ class AssetBalance:
     def remove(self, amount: float):
         self.amount -= abs(amount)
 
+    def compute_usdt_value(self):
+        # Only use binance exchange to get ticker price
+        self.usdt_value = (
+            (
+                cryptowatch.get_price(
+                    exchange="binance",
+                    pair=self.asset.name + "USDT",
+                    date=datetime.now(),
+                )
+                * self.amount
+            )
+            if self.asset._type == "crypto"
+            and self.asset.name != "USDT"
+            and self.asset.name != "KFEE"
+            and not self.is_low()
+            else 0.0
+        )
+
 
 @dataclass
 class ExchangeBalance:
     exchange: str
     assets: Dict[str, AssetBalance]
+    usdt_value: float = 0
 
     def show(self):
-        return "\n".join(
-            map(
-                lambda ab: self.exchange + ab.show(),
-                [a for a in self.assets.values() if not a.is_low()],
+        return (
+            "\n".join(
+                map(
+                    lambda ab: self.exchange + ab.show() + " USDT:%s" % ab.usdt_value,
+                    [a for a in self.assets.values() if not a.is_low()],
+                )
             )
+            + "\n"
+            + "%s[TOTAL CRYPTO ASSET USDT VALUE]: %s" % (self.exchange, self.usdt_value)
         )
 
     def add_to_asset(self, asset: Asset, amount: float):
@@ -181,10 +206,16 @@ class ExchangeBalance:
         ab = self.assets[asset.name]
         ab.remove(amount)
 
+    def compute_usdt_value(self) -> None:
+        for asset in self.assets.values():
+            asset.compute_usdt_value()
+            self.usdt_value += asset.usdt_value
+
 
 @dataclass
 class Balances:
     balances: Dict[str, ExchangeBalance]
+    usdt_value: float = 0
 
     def get_exchange_balance(self, exchange: str) -> ExchangeBalance:
         if exchange not in self.balances:
@@ -192,4 +223,11 @@ class Balances:
         return self.balances[exchange]
 
     def show(self):
-        return "\n".join([eb.show() for eb in self.balances.values()])
+        for eb in self.balances.values():
+            eb.compute_usdt_value()
+            self.usdt_value += eb.usdt_value
+        return (
+            "\n".join([eb.show() for eb in self.balances.values()])
+            + "\n"
+            + "TOTAL CRYPTO ASSET USDT VALUE: %s" % self.usdt_value
+        )
