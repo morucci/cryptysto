@@ -10,7 +10,7 @@ assets_map = {"XXBT": "BTC", "XXDG": "DOGE", "XETH": "ETH", "ZEUR": "EUR"}
 
 
 def is_fiat(name: str) -> bool:
-    if name in ("EUR"):
+    if name in ("EUR", "USD"):
         return True
     else:
         return False
