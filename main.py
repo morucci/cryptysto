@@ -75,7 +75,9 @@ def main() -> None:
     if args.show_balances:
         print("BALANCE Summary at %s" % until_dt)
         print("==============")
-        display_balance(generic_ledger, until_dt, args.compute_usdt_value)
+        display_balance(
+            generic_ledger, until_dt, args.compute_usdt_value, config.apikey
+        )
 
     if args.show_last_op:
         print("Last operation")

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Literal, Union, Dict
+from typing import List, Literal, Union, Dict, Optional
 from cryptysto import cryptowatch
 
 
@@ -66,6 +66,7 @@ class LedgerConfig:
 @dataclass
 class Config:
     ledgers: List[LedgerConfig]
+    apikey: Optional[str]
 
 
 @dataclass(frozen=True)
@@ -157,7 +158,7 @@ class AssetBalance:
     def remove(self, amount: float):
         self.amount -= abs(amount)
 
-    def compute_usdt_value(self, until_date: datetime):
+    def compute_usdt_value(self, until_date: datetime, apiKey: Optional[str]):
         # Only use binance exchange to get ticker price
         self.usdt_value = (
             (
@@ -165,6 +166,7 @@ class AssetBalance:
                     exchange="binance",
                     pair=self.asset.name + "USDT",
                     date=until_date,
+                    apiKey=apiKey,
                 )
                 * self.amount
             )
@@ -206,9 +208,9 @@ class ExchangeBalance:
         ab = self.assets[asset.name]
         ab.remove(amount)
 
-    def compute_usdt_value(self, until_date: datetime) -> None:
+    def compute_usdt_value(self, until_date: datetime, apiKey: Optional[str]) -> None:
         for asset in self.assets.values():
-            asset.compute_usdt_value(until_date)
+            asset.compute_usdt_value(until_date, apiKey=apiKey)
             self.usdt_value += asset.usdt_value
 
 
@@ -222,10 +224,15 @@ class Balances:
             self.balances[exchange] = ExchangeBalance(exchange=exchange, assets=dict())
         return self.balances[exchange]
 
-    def show(self, until_date: datetime, compute_usdt_value: bool):
+    def show(
+        self,
+        until_date: datetime,
+        compute_usdt_value: bool,
+        apiKey: Optional[str],
+    ):
         if compute_usdt_value:
             for eb in self.balances.values():
-                eb.compute_usdt_value(until_date)
+                eb.compute_usdt_value(until_date, apiKey)
                 self.usdt_value += eb.usdt_value
         return (
             "\n".join([eb.show() for eb in self.balances.values()])
