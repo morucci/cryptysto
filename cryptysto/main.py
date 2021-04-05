@@ -57,7 +57,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--filter-asset-type",
-        help="Filter on asset type type",
+        help="Filter on asset type",
         choices=[
             "crypto",
             "fiat",

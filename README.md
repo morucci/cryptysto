@@ -4,6 +4,12 @@ A small tool to compute assets across exchanges. Only Bitfinex, Kraken and Binan
 
 This tool is for demo purpose only. Results might not be accurate.
 
+## Installation
+
+$ git clone https://github.com/morucci/cryptysto.git
+$ cd cryptysto
+$ python setup.py install --user
+
 ## Usage
 
 Create a config.yaml file such as:
