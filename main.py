@@ -43,6 +43,18 @@ def main() -> None:
     parser.add_argument(
         "--compute-usdt-value", help="Add usdt value to balance", action="store_true"
     )
+    parser.add_argument(
+        "--filter-op-type",
+        help="Filter on operation type",
+        choices=[
+            "Deposit",
+            "DepositFee",
+            "Withdrawal",
+            "WithdrawalFee",
+            "Trade",
+            "TradeFee",
+        ],
+    )
     parser.add_argument("--compute-until", help="Compute until date")
     args = parser.parse_args()
 
@@ -60,6 +72,21 @@ def main() -> None:
         until_dt = datetime.strptime(args.compute_until, "%Y-%m-%d")
         generic_ledger.ops = list(
             filter(lambda op: op.date <= until_dt, generic_ledger.ops)
+        )
+
+    if args.filter_op_type:
+        m = {
+            "Deposit": Deposit,
+            "DepositFee": DepositFee,
+            "Withdrawal": Withdrawal,
+            "WithdrawalFee": WithdrawalFee,
+            "Trade": Trade,
+            "TradeFee": TradeFee,
+        }
+        generic_ledger.ops = list(
+            filter(
+                lambda op: isinstance(op, m[args.filter_op_type]), generic_ledger.ops
+            )
         )
 
     if args.show_ledger_ops:
