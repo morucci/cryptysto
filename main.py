@@ -55,6 +55,14 @@ def main() -> None:
             "TradeFee",
         ],
     )
+    parser.add_argument(
+        "--filter-asset-type",
+        help="Filter on asset type type",
+        choices=[
+            "crypto",
+            "fiat",
+        ],
+    )
     parser.add_argument("--compute-until", help="Compute until date")
     args = parser.parse_args()
 
@@ -86,6 +94,13 @@ def main() -> None:
         generic_ledger.ops = list(
             filter(
                 lambda op: isinstance(op, m[args.filter_op_type]), generic_ledger.ops
+            )
+        )
+
+    if args.filter_asset_type:
+        generic_ledger.ops = list(
+            filter(
+                lambda op: op.asset._type == args.filter_asset_type, generic_ledger.ops
             )
         )
 
