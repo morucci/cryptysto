@@ -11,18 +11,21 @@ from cryptysto.bitfinex import (
     load_bitfinex_ledger_file,
 )
 from cryptysto.kraken import transform_kraken_le_to_generic, load_kraken_ledger_file
+from cryptysto.local import transform_local_le_to_generic, load_local_ledger_file
 from cryptysto import utils
 
 
 def load_ledger_file(
     _type: LedgerType, path: Path
-) -> Union[BitfinexLedger, KrakenLedger, BinanceLedger]:
+) -> Union[BitfinexLedger, KrakenLedger, BinanceLedger, LocalLedger]:
     if _type == "bitfinex":
         return load_bitfinex_ledger_file(path)
     elif _type == "kraken":
         return load_kraken_ledger_file(path)
     elif _type == "binance":
         return load_binance_ledger_file(path)
+    elif _type == "local":
+        return load_local_ledger_file(path)
     else:
         raise RuntimeError("Ledger type not supported")
 
@@ -45,6 +48,8 @@ def transform_to_generic(ledgers: InputLedgers) -> GenericLedger:
                 add_in_generic_ops(transform_binance_le_to_generic(le))
             if isinstance(le, BitfinexLedgerEntry):
                 add_in_generic_ops(transform_bifinex_le_to_generic(le))
+            if isinstance(le, LocalLedgerEntry):
+                add_in_generic_ops(transform_local_le_to_generic(le))
     return generic
 
 

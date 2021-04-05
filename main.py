@@ -66,7 +66,7 @@ def main() -> None:
     parser.add_argument(
         "--filter-exchange",
         help="Filter on exchange name",
-        choices=["Binance", "Bitfinex", "Kraken"],
+        choices=["Binance", "Bitfinex", "Kraken", "Local"],
     )
     parser.add_argument("--compute-until", help="Compute until date")
     args = parser.parse_args()

@@ -48,13 +48,26 @@ class BinanceLedgerEntry:
 BinanceLedger = List[BinanceLedgerEntry]
 
 
+@dataclass(frozen=True)
+class LocalLedgerEntry:
+    time: datetime
+    account: str
+    operation: str
+    coin: str
+    change: float
+    remark: str
+
+
+LocalLedger = List[LocalLedgerEntry]
+
+
 @dataclass
 class Asset:
     name: str
     _type: Literal["crypto", "fiat"]
 
 
-LedgerType = Literal["bitfinex", "kraken", "binance"]
+LedgerType = Literal["bitfinex", "kraken", "binance", "local"]
 
 
 @dataclass
@@ -134,7 +147,7 @@ class GenericLedger:
     ops: GenericOpTypes
 
 
-InputLedgers = List[Union[BitfinexLedger, KrakenLedger, BinanceLedger]]
+InputLedgers = List[Union[BitfinexLedger, KrakenLedger, BinanceLedger, LocalLedger]]
 
 
 @dataclass
