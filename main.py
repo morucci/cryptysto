@@ -63,6 +63,11 @@ def main() -> None:
             "fiat",
         ],
     )
+    parser.add_argument(
+        "--filter-exchange",
+        help="Filter on exchange name",
+        choices=["Binance", "Bitfinex", "Kraken"],
+    )
     parser.add_argument("--compute-until", help="Compute until date")
     args = parser.parse_args()
 
@@ -102,6 +107,11 @@ def main() -> None:
             filter(
                 lambda op: op.asset._type == args.filter_asset_type, generic_ledger.ops
             )
+        )
+
+    if args.filter_exchange:
+        generic_ledger.ops = list(
+            filter(lambda op: op.exchange == args.filter_exchange, generic_ledger.ops)
         )
 
     if args.show_ledger_ops:
