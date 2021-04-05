@@ -6,9 +6,11 @@ This tool is for demo purpose only. Results might not be accurate.
 
 ## Installation
 
+```Shell
 $ git clone https://github.com/morucci/cryptysto.git
 $ cd cryptysto
 $ python setup.py install --user
+```
 
 ## Usage
 
