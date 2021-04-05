@@ -27,7 +27,7 @@ ledgers:
 ### Show balance
 
 ```Shell
-$ ./main.py --config=config.yaml --show-balance --compute-usdt-value
+$ cryptysto --config=config.yaml --show-balance --compute-usdt-value
 Dedup Warn: 2021-02-09 23:42:24: [Binance] Trade [LTC] amount: XXX
 Dedup Warn: 2021-02-09 23:42:24: [Binance] Trade [USDT] amount: XXX
 Dedup Warn: 2021-02-02 08:43:57: [Kraken] Trade Fee [EUR] amount: XXX
@@ -48,7 +48,7 @@ TOTAL CRYPTO ASSET USDT VALUE: XXX
 Note the filtering capability.
 
 ```Shell
-$ ./main.py --config=config.yaml --show-ledger-summary --filter-exchange Kraken --filter-op-type Deposit --filter-asset-type fiat
+$ cryptysto --config=config.yaml --show-ledger-summary --filter-exchange Kraken --filter-op-type Deposit --filter-asset-type fiat
 LEDGER Summary
 ==============
 Total Deposit on Kraken of EUR: XXX
@@ -57,7 +57,7 @@ Total Deposit on Kraken of EUR: XXX
 ### Usage help
 
 ```Shell
-[user@781d164145e9 cryptysto]$ ./main.py -h
+$ cryptysto -h
 usage: main.py [-h] [--config CONFIG] [--show-ledger-ops] [--show-ledger-summary] [--show-balances] [--show-last-op] [--compute-usdt-value]
                [--filter-op-type {Deposit,DepositFee,Withdrawal,WithdrawalFee,Trade,TradeFee}] [--filter-asset-type {crypto,fiat}]
                [--filter-exchange {Binance,Bitfinex,Kraken,Local}] [--compute-until COMPUTE_UNTIL]
